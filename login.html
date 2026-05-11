@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login | EduPortal</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
+</head>
+<body class="auth-page">
+  <div class="auth-shell fade-in">
+    <div class="auth-card">
+      <h1>Login</h1>
+      <p>Access your EduPortal dashboard securely.</p>
+      <form id="loginForm">
+        <label>Email</label>
+        <input type="email" id="loginEmail" required placeholder="name@example.com" />
+        <label>Password</label>
+        <input type="password" id="loginPassword" required placeholder="••••••••" />
+        <p class="form-error" id="loginError"></p>
+        <button id="loginSubmit" type="submit"><a href="index.html">Login</a></button>
+      </form>
+      <p class="auth-foot">Don't have an account? <a href="register.html">Register</a></p>
+    </div>
+  </div>
+</body>
+</html>

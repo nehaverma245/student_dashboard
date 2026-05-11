@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduPortal — Student Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4ff;
+    --bg2: #e6ecfa;
+    --surface: #ffffff;
+    --surface2: #f7f9ff;
+    --border: #dde4f5;
+    --text: #0f1535;
+    --text2: #4a5580;
+    --text3: #8892b0;
+    --accent: #3b5bfc;
+    --accent2: #7c3aed;
+    --accent3: #06b6d4;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f97316;
+    --shadow: 0 4px 24px rgba(59,91,252,0.10);
+    --shadow2: 0 2px 12px rgba(59,91,252,0.06);
+    --radius: 18px;
+    --radius-sm: 10px;
+    --sidebar-w: 240px;
+    --transition: 0.35s cubic-bezier(.4,0,.2,1);
+  }
+  [data-theme="dark"] {
+    --bg: #0a0d1a;
+    --bg2: #111628;
+    --surface: #161c35;
+    --surface2: #1e2645;
+    --border: #2a3360;
+    --text: #e8eeff;
+    --text2: #9ba8d4;
+    --text3: #5a6898;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --shadow2: 0 2px 12px rgba(0,0,0,0.3);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background var(--transition), color var(--transition);
+  }
+
+  /* ── SIDEBAR ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 28px 0 20px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+    transition: background var(--transition), border-color var(--transition), transform 0.4s cubic-bezier(.4,0,.2,1);
+  }
+
+  .logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 0 22px 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 18px;
+    box-shadow: 0 4px 14px rgba(59,91,252,0.4);
+  }
+  .logo-text { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 17px; color: var(--text); }
+  .logo-text span { color: var(--accent); }
+
+  .nav { flex: 1; padding: 22px 14px 0; display: flex; flex-direction: column; gap: 4px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    color: var(--text2); font-size: 14px; font-weight: 500;
+    cursor: pointer; text-decoration: none;
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+    position: relative;
+  }
+  .nav-item:hover { background: var(--bg2); color: var(--accent); transform: translateX(4px); }
+  .nav-item.active { background: linear-gradient(135deg,rgba(59,91,252,0.13),rgba(124,58,237,0.08)); color: var(--accent); font-weight: 600; }
+  .nav-item.active::before {
+    content: '';
+    position: absolute; left: 0; top: 20%; bottom: 20%;
+    width: 3px; border-radius: 99px;
+    background: linear-gradient(var(--accent), var(--accent2));
+  }
+  .nav-icon { font-size: 18px; width: 22px; text-align: center; }
+  .nav-badge {
+    margin-left: auto; background: var(--accent); color: #fff;
+    font-size: 10px; font-weight: 700; padding: 2px 7px;
+    border-radius: 99px; min-width: 20px; text-align: center;
+  }
+
+  .sidebar-footer {
+    padding: 16px 14px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 16px;
+  }
+  .theme-toggle-wrap { display: flex; align-items: center; gap: 10px; padding: 10px 14px; }
+  .theme-label { font-size: 13px; color: var(--text2); flex: 1; }
+  .toggle {
+    width: 44px; height: 24px; background: var(--border);
+    border-radius: 99px; position: relative;
+    cursor: pointer; transition: background 0.3s;
+    border: none; outline: none;
+  }
+  .toggle.on { background: linear-gradient(135deg, var(--accent), var(--accent2)); }
+  .toggle::after {
+    content: '';
+    position: absolute; top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    background: #fff; border-radius: 50%;
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+  }
+  .toggle.on::after { transform: translateX(20px); }
+
+  /* ── MAIN ── */
+  .main {
+    margin-left: var(--sidebar-w);
+    flex: 1; padding: 30px 32px;
+    transition: margin-left 0.4s;
+  }
+
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 28px;
+  }
+  .topbar-left h1 { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 26px; }
+  .topbar-left p { color: var(--text2); font-size: 14px; margin-top: 3px; }
+  .topbar-right { display: flex; align-items: center; gap: 12px; }
+  .icon-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: var(--surface); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 18px; transition: all 0.2s;
+    position: relative;
+  }
+  .icon-btn:hover { background: var(--accent); color: #fff; border-color: var(--accent); transform: scale(1.1); }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; background: var(--red);
+    border-radius: 50%; border: 2px solid var(--surface);
+  }
+  .avatar-btn {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 15px;
+    cursor: pointer; transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(59,91,252,0.35);
+  }
+  .avatar-btn:hover { transform: scale(1.1); box-shadow: 0 6px 20px rgba(59,91,252,0.45); }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    transition: background var(--transition), border-color var(--transition),
+                transform 0.25s cubic-bezier(.4,0,.2,1), box-shadow 0.25s;
+    box-shadow: var(--shadow2);
+  }
+  .card:hover { transform: translateY(-4px); box-shadow: var(--shadow); }
+  .card-title {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--text3); margin-bottom: 14px;
+  }
+
+  /* ── PROFILE CARD ── */
+  .profile-card {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff; border: none; padding: 28px 24px;
+    grid-column: span 1; position: relative; overflow: hidden;
+  }
+  .profile-card::before {
+    content: ''; position: absolute;
+    top: -40px; right: -40px;
+    width: 160px; height: 160px;
+    background: rgba(255,255,255,0.07);
+    border-radius: 50%;
+  }
+  .profile-card::after {
+    content: ''; position: absolute;
+    bottom: -60px; left: -20px;
+    width: 200px; height: 200px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+  .profile-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(59,91,252,0.4); }
+  .profile-avatar {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 3px solid rgba(255,255,255,0.5);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; margin-bottom: 14px;
+    position: relative; z-index: 1;
+    transition: transform 0.3s;
+  }
+  .profile-card:hover .profile-avatar { transform: scale(1.08) rotate(-3deg); }
+  .profile-name { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; position: relative; z-index: 1; }
+  .profile-dept { font-size: 13px; opacity: 0.82; margin-top: 3px; position: relative; z-index: 1; }
+  .profile-tags { display: flex; gap: 7px; margin-top: 14px; flex-wrap: wrap; position: relative; z-index: 1; }
+  .profile-tag {
+    background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.3);
+    border-radius: 99px; padding: 3px 11px; font-size: 12px; font-weight: 500;
+  }
+
+  /* ── STAT CARDS ── */
+  .stat-card { display: flex; flex-direction: column; gap: 10px; }
+  .stat-icon {
+    width: 44px; height: 44px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; margin-bottom: 4px;
+  }
+  .stat-value { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 28px; line-height: 1; }
+  .stat-label { font-size: 13px; color: var(--text2); }
+  .stat-sub { font-size: 11px; color: var(--text3); margin-top: 6px; display: flex; align-items: center; gap: 4px; }
+  .stat-sub .up { color: var(--green); }
+  .stat-sub .down { color: var(--red); }
+
+  /* ── PROGRESS BAR ── */
+  .progress-wrap { background: var(--bg2); border-radius: 99px; height: 7px; overflow: hidden; margin-top: 8px; }
+  .progress-bar {
+    height: 100%; border-radius: 99px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    width: 0;
+    transition: width 1.2s cubic-bezier(.4,0,.2,1);
+    position: relative;
+  }
+  .progress-bar::after {
+    content: '';
+    position: absolute; right: 0; top: -1px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent2);
+    box-shadow: 0 0 6px var(--accent2);
+  }
+
+  /* ── COURSES ── */
+  .course-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    transition: transform 0.2s;
+    cursor: pointer;
+  }
+  .course-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .course-item:hover { transform: translateX(5px); }
+  .course-dot {
+    width: 42px; height: 42px; border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; flex-shrink: 0;
+  }
+  .course-info { flex: 1; }
+  .course-name { font-weight: 600; font-size: 14px; }
+  .course-meta { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .course-grade {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px;
+    color: var(--accent);
+  }
+
+  /* ── ANNOUNCEMENTS ── */
+  .announce-item {
+    display: flex; gap: 12px; padding: 13px 0;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .announce-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .announce-item:hover { transform: translateX(4px); }
+  .announce-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 6px;
+  }
+  .announce-title { font-weight: 600; font-size: 14px; }
+  .announce-desc { font-size: 12px; color: var(--text2); margin-top: 3px; line-height: 1.5; }
+  .announce-time { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .announce-tag {
+    display: inline-block; padding: 2px 8px; border-radius: 5px;
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: .04em; margin-left: 6px;
+  }
+
+  /* ── TASKS ── */
+  .task-input-row {
+    display: flex; gap: 10px; margin-bottom: 16px;
+  }
+  .task-input {
+    flex: 1; padding: 10px 14px;
+    background: var(--bg2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); color: var(--text);
+    font-family: 'DM Sans', sans-serif; font-size: 14px;
+    outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .task-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,91,252,0.12); }
+  .btn-add {
+    padding: 10px 18px; border-radius: var(--radius-sm);
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff; font-family: 'DM Sans', sans-serif;
+    font-weight: 600; font-size: 14px; border: none; cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    white-space: nowrap;
+  }
+  .btn-add:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(59,91,252,0.35); }
+  .btn-add:active { transform: scale(0.96); }
+
+  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  .task-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; border-radius: var(--radius-sm);
+    background: var(--surface2); border: 1px solid var(--border);
+    transition: all 0.25s;
+    animation: taskSlideIn 0.3s ease;
+  }
+  @keyframes taskSlideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+  .task-item:hover { border-color: var(--accent); box-shadow: 0 2px 12px rgba(59,91,252,0.1); }
+  .task-item.done { opacity: 0.55; }
+  .task-item.done .task-text { text-decoration: line-through; color: var(--text3); }
+  .task-check {
+    width: 20px; height: 20px; border-radius: 6px;
+    border: 2px solid var(--border); cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; flex-shrink: 0; background: var(--surface);
+  }
+  .task-item.done .task-check {
+    background: var(--green); border-color: var(--green); color: #fff; font-size: 12px;
+  }
+  .task-text { flex: 1; font-size: 14px; }
+  .task-del {
+    width: 26px; height: 26px; border-radius: 6px;
+    border: none; background: transparent; cursor: pointer;
+    color: var(--text3); display: flex; align-items: center; justify-content: center;
+    font-size: 14px; transition: all 0.2s;
+  }
+  .task-del:hover { background: rgba(239,68,68,0.12); color: var(--red); }
+
+  /* ── CHART ── */
+  .chart-bars {
+    display: flex; align-items: flex-end; gap: 10px;
+    height: 100px; margin-top: 14px;
+  }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .bar {
+    width: 100%; border-radius: 6px 6px 0 0;
+    background: linear-gradient(180deg, var(--accent), rgba(59,91,252,0.4));
+    transition: height 1s cubic-bezier(.4,0,.2,1), background 0.3s;
+    position: relative; cursor: pointer;
+    animation: barRise 1s cubic-bezier(.4,0,.2,1) both;
+  }
+  @keyframes barRise { from { height: 0 !important; } }
+  .bar:hover { background: linear-gradient(180deg, var(--accent2), rgba(124,58,237,0.5)); }
+  .bar-label { font-size: 11px; color: var(--text3); }
+
+  /* ── SCHEDULE ── */
+  .schedule-item {
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 14px; border-radius: var(--radius-sm);
+    background: var(--surface2); border: 1px solid var(--border);
+    margin-bottom: 9px; cursor: pointer;
+    transition: all 0.25s;
+  }
+  .schedule-item:hover { border-color: var(--accent); transform: translateX(4px); }
+  .schedule-time {
+    font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px;
+    color: var(--accent); min-width: 54px;
+  }
+  .schedule-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .schedule-info { flex: 1; }
+  .schedule-name { font-weight: 600; font-size: 14px; }
+  .schedule-room { font-size: 12px; color: var(--text3); margin-top: 2px; }
+  .schedule-badge {
+    padding: 3px 10px; border-radius: 99px; font-size: 11px; font-weight: 600;
+  }
+
+  /* ── ANIMATIONS ── */
+  .fade-in { animation: fadeIn 0.6s ease both; }
+  .fade-in-up { animation: fadeInUp 0.6s ease both; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+  .delay-1 { animation-delay: 0.08s; }
+  .delay-2 { animation-delay: 0.16s; }
+  .delay-3 { animation-delay: 0.24s; }
+  .delay-4 { animation-delay: 0.32s; }
+  .delay-5 { animation-delay: 0.40s; }
+  .delay-6 { animation-delay: 0.48s; }
+
+  /* ── SECTION HEADER ── */
+  .section-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .section-hdr h2 { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; }
+  .section-hdr a {
+    font-size: 12px; color: var(--accent); text-decoration: none; font-weight: 600;
+    transition: opacity 0.2s;
+  }
+  .section-hdr a:hover { opacity: 0.7; }
+
+  /* ── MOBILE ── */
+  .hamburger {
+    display: none; width: 40px; height: 40px;
+    border-radius: 10px; background: var(--surface);
+    border: 1px solid var(--border); align-items: center;
+    justify-content: center; cursor: pointer; font-size: 20px;
+    transition: all 0.2s;
+  }
+  .hamburger:hover { background: var(--accent); color: #fff; }
+
+  .overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4); z-index: 99;
+    opacity: 0; transition: opacity 0.3s;
+  }
+  .overlay.show { opacity: 1; }
+
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 700px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; padding: 20px 16px; }
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+    .hamburger { display: flex; }
+    .overlay { display: block; }
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+  /* ── RIPPLE ── */
+  .ripple { position: relative; overflow: hidden; }
+  .ripple-effect {
+    position: absolute; border-radius: 50%;
+    background: rgba(255,255,255,0.35);
+    transform: scale(0);
+    animation: rippleAnim 0.6s linear;
+    pointer-events: none;
+  }
+  @keyframes rippleAnim {
+    to { transform: scale(4); opacity: 0; }
+  }
+
+  /* ── PAGE SECTIONS ── */
+  .page { display: none; }
+  .page.active { display: block; animation: fadeInUp 0.4s ease; }
+</style>
+</head>
+<body>
+
+<!-- Overlay -->
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-text">Edu<span>Portal</span></div>
+  </div>
+  <nav class="nav">
+    <a class="nav-item active ripple" onclick="showPage('dashboard',this)">
+      <span class="nav-icon">🏠</span> Dashboard
+    </a>
+    <a class="nav-item ripple" onclick="showPage('courses',this)">
+      <span class="nav-icon">📚</span> Courses
+    </a>
+    <a class="nav-item ripple" onclick="showPage('assignments',this)">
+      <span class="nav-icon">📝</span> Assignments
+      <span class="nav-badge">3</span>
+    </a>
+    <a class="nav-item ripple" onclick="showPage('attendance',this)">
+      <span class="nav-icon">📅</span> Attendance
+    </a>
+    <a class="nav-item ripple" onclick="showPage('messages',this)">
+      <span class="nav-icon">💬</span> Messages
+      <span class="nav-badge">5</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="theme-toggle-wrap">
+      <span style="font-size:16px">🌙</span>
+      <span class="theme-label">Dark Mode</span>
+      <button class="toggle" id="themeToggle" onclick="toggleTheme(this)" title="Toggle Dark Mode"></button>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- Topbar -->
+  <div class="topbar fade-in">
+    <div style="display:flex;align-items:center;gap:14px">
+      <button class="hamburger" onclick="openSidebar()">☰</button>
+      <div class="topbar-left">
+        <h1 id="pageTitle">Good Morning, Sakshi! 👋</h1>
+        <p id="pageSubtitle">Wednesday, March 10 · Semester 6</p>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="icon-btn" title="Search">🔍</div>
+      <div class="icon-btn" title="Notifications">
+        🔔<div class="notif-dot"></div>
+      </div>
+      <div class="avatar-btn" title="Profile">PS</div>
+    </div>
+  </div>
+
+  <!-- ══ DASHBOARD PAGE ══ -->
+  <div class="page active" id="page-dashboard">
+
+    <!-- Row 1: Profile + Stats -->
+    <div class="grid-4" style="margin-bottom:20px">
+
+      <!-- Profile Card -->
+      <div class="card profile-card fade-in-up">
+        <div class="profile-avatar">👩‍💻</div>
+        <div class="profile-name">Sakshi Rajpoot</div>
+        <div class="profile-dept">Computer Science & Engineering</div>
+        <div class="profile-tags">
+          <span class="profile-tag">Semester 6</span>
+          <span class="profile-tag">Roll: CS21047</span>
+        </div>
+      </div>
+
+      <!-- Attendance -->
+      <div class="card stat-card fade-in-up delay-1">
+        <div class="card-title">Attendance</div>
+        <div class="stat-icon" style="background:rgba(16,185,129,0.12)">📊</div>
+        <div class="stat-value" style="color:var(--green)" id="attVal">0%</div>
+        <div class="stat-label">Present this semester</div>
+        <div class="progress-wrap"><div class="progress-bar" id="attBar" style="background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+        <div class="stat-sub"><span class="up">↑ 2%</span> from last month</div>
+      </div>
+
+      <!-- GPA -->
+      <div class="card stat-card fade-in-up delay-2">
+        <div class="card-title">Current GPA</div>
+        <div class="stat-icon" style="background:rgba(59,91,252,0.12)">⭐</div>
+        <div class="stat-value" style="color:var(--accent)" id="gpaVal">0.0</div>
+        <div class="stat-label">Out of 10.0 CGPA</div>
+        <div class="progress-wrap"><div class="progress-bar" id="gpaBar"></div></div>
+        <div class="stat-sub"><span class="up">↑ 0.3</span> from last sem</div>
+      </div>
+
+      <!-- Assignments -->
+      <div class="card stat-card fade-in-up delay-3">
+        <div class="card-title">Assignments</div>
+        <div class="stat-icon" style="background:rgba(249,115,22,0.12)">✅</div>
+        <div class="stat-value" style="color:var(--orange)">18<span style="font-size:14px;color:var(--text3)">/21</span></div>
+        <div class="stat-label">Completed this semester</div>
+        <div class="progress-wrap"><div class="progress-bar" id="assBar" style="background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+        <div class="stat-sub"><span class="down">3</span> pending tasks</div>
+      </div>
+    </div>
+
+    <!-- Row 2: Courses + Announcements -->
+    <div class="grid-2" style="margin-bottom:20px">
+
+      <!-- Courses -->
+      <div class="card fade-in-up delay-2">
+        <div class="section-hdr">
+          <h2>📚 My Courses</h2>
+          <a href="#">View all →</a>
+        </div>
+        <div class="course-item">
+          <div class="course-dot" style="background:rgba(59,91,252,0.12)">🤖</div>
+          <div class="course-info">
+            <div class="course-name">Machine Learning</div>
+            <div class="course-meta">Prof. A. Kumar · Mon, Wed 10:00 AM</div>
+            <div class="progress-wrap" style="margin-top:6px"><div class="progress-bar" style="width:78%"></div></div>
+          </div>
+          <div class="course-grade">A</div>
+        </div>
+        <div class="course-item">
+          <div class="course-dot" style="background:rgba(16,185,129,0.12)">🗄️</div>
+          <div class="course-info">
+            <div class="course-name">Database Systems</div>
+            <div class="course-meta">Prof. R. Singh · Tue, Thu 11:30 AM</div>
+            <div class="progress-wrap" style="margin-top:6px"><div class="progress-bar" style="width:91%"></div></div>
+          </div>
+          <div class="course-grade">A+</div>
+        </div>
+        <div class="course-item">
+          <div class="course-dot" style="background:rgba(245,158,11,0.12)">🌐</div>
+          <div class="course-info">
+            <div class="course-name">Web Technologies</div>
+            <div class="course-meta">Prof. S. Patel · Wed, Fri 2:00 PM</div>
+            <div class="progress-wrap" style="margin-top:6px"><div class="progress-bar" style="width:65%"></div></div>
+          </div>
+          <div class="course-grade">B+</div>
+        </div>
+        <div class="course-item">
+          <div class="course-dot" style="background:rgba(124,58,237,0.12)">🔐</div>
+          <div class="course-info">
+            <div class="course-name">Cyber Security</div>
+            <div class="course-meta">Prof. M. Nair · Mon, Fri 3:30 PM</div>
+            <div class="progress-wrap" style="margin-top:6px"><div class="progress-bar" style="width:55%"></div></div>
+          </div>
+          <div class="course-grade">B</div>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="card fade-in-up delay-3">
+        <div class="section-hdr">
+          <h2>📢 Announcements</h2>
+          <a href="#">Mark all read</a>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--red)"></div>
+          <div>
+            <div class="announce-title">ML Mid-Term Exam
+              <span class="announce-tag" style="background:rgba(239,68,68,0.12);color:var(--red)">Urgent</span>
+            </div>
+            <div class="announce-desc">Machine Learning mid-semester exam scheduled. Covers Unit 1–4. Bring student ID.</div>
+            <div class="announce-time">📅 March 15, 2026 · 10:00 AM – 12:00 PM</div>
+          </div>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--accent)"></div>
+          <div>
+            <div class="announce-title">Project Submission Deadline
+              <span class="announce-tag" style="background:rgba(59,91,252,0.12);color:var(--accent)">Academic</span>
+            </div>
+            <div class="announce-desc">Final year project report submission. Upload to the portal before midnight.</div>
+            <div class="announce-time">📅 March 20, 2026 · 11:59 PM</div>
+          </div>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="announce-title">Hackathon 2026 Registrations Open
+              <span class="announce-tag" style="background:rgba(16,185,129,0.12);color:var(--green)">Event</span>
+            </div>
+            <div class="announce-desc">Annual college hackathon. Team of 2–4. Register via Student Portal by March 12.</div>
+            <div class="announce-time">📅 March 25–26, 2026</div>
+          </div>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--gold)"></div>
+          <div>
+            <div class="announce-title">Fee Payment Reminder
+              <span class="announce-tag" style="background:rgba(245,158,11,0.12);color:var(--gold)">Finance</span>
+            </div>
+            <div class="announce-desc">Semester 7 fee payment window opens March 18. Avoid late fees.</div>
+            <div class="announce-time">📅 March 18 – April 5, 2026</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 3: Chart + Schedule + Tasks -->
+    <div class="grid-3">
+
+      <!-- Performance Chart -->
+      <div class="card fade-in-up delay-2">
+        <div class="section-hdr">
+          <h2>📈 Performance</h2>
+          <a href="#">Semester view</a>
+        </div>
+        <div class="chart-bars" id="chartBars">
+          <div class="bar-col"><div class="bar" style="height:60%"></div><div class="bar-label">ML</div></div>
+          <div class="bar-col"><div class="bar" style="height:91%"></div><div class="bar-label">DB</div></div>
+          <div class="bar-col"><div class="bar" style="height:65%"></div><div class="bar-label">WT</div></div>
+          <div class="bar-col"><div class="bar" style="height:55%"></div><div class="bar-label">CS</div></div>
+          <div class="bar-col"><div class="bar" style="height:80%"></div><div class="bar-label">OS</div></div>
+          <div class="bar-col"><div class="bar" style="height:72%"></div><div class="bar-label">Algo</div></div>
+        </div>
+        <div style="display:flex;gap:14px;margin-top:14px;font-size:12px;color:var(--text3)">
+          <span>🔵 Marks %</span>
+          <span style="margin-left:auto">Avg: <strong style="color:var(--accent)">70.5%</strong></span>
+        </div>
+      </div>
+
+      <!-- Today's Schedule -->
+      <div class="card fade-in-up delay-3">
+        <div class="section-hdr">
+          <h2>🗓️ Today's Schedule</h2>
+          <a href="#">Full calendar</a>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-time">9:00 AM</div>
+          <div class="schedule-dot" style="background:var(--accent)"></div>
+          <div class="schedule-info">
+            <div class="schedule-name">Machine Learning</div>
+            <div class="schedule-room">Room 301 · Prof. A. Kumar</div>
+          </div>
+          <span class="schedule-badge" style="background:rgba(59,91,252,0.12);color:var(--accent)">Live</span>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-time">11:30 AM</div>
+          <div class="schedule-dot" style="background:var(--green)"></div>
+          <div class="schedule-info">
+            <div class="schedule-name">Database Systems Lab</div>
+            <div class="schedule-room">Lab 204 · Prof. R. Singh</div>
+          </div>
+          <span class="schedule-badge" style="background:rgba(16,185,129,0.12);color:var(--green)">Next</span>
+        </div>
+        <div class="schedule-item">
+          <div class="schedule-time">2:00 PM</div>
+          <div class="schedule-dot" style="background:var(--gold)"></div>
+          <div class="schedule-info">
+            <div class="schedule-name">Web Technologies</div>
+            <div class="schedule-room">Room 112 · Prof. S. Patel</div>
+          </div>
+          <span class="schedule-badge" style="background:rgba(245,158,11,0.12);color:var(--gold)">Soon</span>
+        </div>
+      </div>
+
+      <!-- Task Manager -->
+      <div class="card fade-in-up delay-4">
+        <div class="section-hdr">
+          <h2>✅ Task Manager</h2>
+          <span id="taskCount" style="font-size:12px;color:var(--text3)">0/0 done</span>
+        </div>
+        <div class="task-input-row">
+          <input class="task-input" id="taskInput" placeholder="Add a new task..." onkeydown="if(event.key==='Enter')addTask()">
+          <button class="btn-add ripple" onclick="addTask()">+ Add</button>
+        </div>
+        <div class="task-list" id="taskList"></div>
+      </div>
+    </div>
+  </div><!-- /dashboard -->
+
+  <!-- ══ COURSES PAGE ══ -->
+  <div class="page" id="page-courses">
+    <div class="grid-3" style="margin-bottom:20px">
+      <div class="card fade-in-up" style="border-top:4px solid var(--accent)">
+        <div style="font-size:36px;margin-bottom:12px">🤖</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Machine Learning</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. A. Kumar · 4 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:78%"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 78%</span>
+          <span style="color:var(--accent);font-weight:700">Grade: A</span>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-1" style="border-top:4px solid var(--green)">
+        <div style="font-size:36px;margin-bottom:12px">🗄️</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Database Systems</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. R. Singh · 3 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:91%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 91%</span>
+          <span style="color:var(--green);font-weight:700">Grade: A+</span>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-2" style="border-top:4px solid var(--gold)">
+        <div style="font-size:36px;margin-bottom:12px">🌐</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Web Technologies</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. S. Patel · 3 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:65%;background:linear-gradient(90deg,var(--gold),#fbbf24)"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 65%</span>
+          <span style="color:var(--gold);font-weight:700">Grade: B+</span>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-3" style="border-top:4px solid var(--accent2)">
+        <div style="font-size:36px;margin-bottom:12px">🔐</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Cyber Security</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. M. Nair · 3 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:55%;background:linear-gradient(90deg,var(--accent2),#a78bfa)"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 55%</span>
+          <span style="color:var(--accent2);font-weight:700">Grade: B</span>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-4" style="border-top:4px solid var(--accent3)">
+        <div style="font-size:36px;margin-bottom:12px">⚙️</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Operating Systems</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. D. Verma · 4 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:80%;background:linear-gradient(90deg,var(--accent3),#67e8f9)"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 80%</span>
+          <span style="color:var(--accent3);font-weight:700">Grade: A</span>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-5" style="border-top:4px solid var(--orange)">
+        <div style="font-size:36px;margin-bottom:12px">🔬</div>
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">Algorithms</div>
+        <div style="font-size:13px;color:var(--text2);margin:6px 0">Prof. P. Iyer · 4 Credits</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:72%;background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px;font-size:12px">
+          <span style="color:var(--text3)">Progress 72%</span>
+          <span style="color:var(--orange);font-weight:700">Grade: A-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ASSIGNMENTS PAGE ══ -->
+  <div class="page" id="page-assignments">
+    <div class="grid-2">
+      <div class="card fade-in-up">
+        <div class="section-hdr"><h2>📝 Pending Assignments</h2><span style="color:var(--red);font-size:12px">3 due soon</span></div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--red)"></div>
+          <div>
+            <div class="announce-title">ML Assignment 4 — Neural Networks</div>
+            <div class="announce-desc">Implement a 3-layer neural network from scratch using NumPy. Submit Jupyter notebook.</div>
+            <div class="announce-time">⚠️ Due: March 13, 2026</div>
+          </div>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--orange)"></div>
+          <div>
+            <div class="announce-title">DBMS Mini Project — ER Diagram</div>
+            <div class="announce-desc">Design a complete ER diagram for a Library Management System. Include normalization.</div>
+            <div class="announce-time">⚠️ Due: March 17, 2026</div>
+          </div>
+        </div>
+        <div class="announce-item">
+          <div class="announce-dot" style="background:var(--gold)"></div>
+          <div>
+            <div class="announce-title">Web Tech — Responsive Portfolio</div>
+            <div class="announce-desc">Build a personal portfolio using HTML, CSS, and JavaScript. Must be mobile responsive.</div>
+            <div class="announce-time">⚠️ Due: March 22, 2026</div>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-2">
+        <div class="section-hdr"><h2>✅ Completed</h2><span style="color:var(--green);font-size:12px">18 done</span></div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div class="task-item done" style="animation:none">
+            <div class="task-check">✓</div>
+            <div class="task-text">ML Assignment 3 — Decision Trees</div>
+          </div>
+          <div class="task-item done" style="animation:none">
+            <div class="task-check">✓</div>
+            <div class="task-text">DBMS Lab 5 — SQL Queries</div>
+          </div>
+          <div class="task-item done" style="animation:none">
+            <div class="task-check">✓</div>
+            <div class="task-text">Web Tech — CSS Animations</div>
+          </div>
+          <div class="task-item done" style="animation:none">
+            <div class="task-check">✓</div>
+            <div class="task-text">Cyber Security Report 2</div>
+          </div>
+          <div class="task-item done" style="animation:none">
+            <div class="task-check">✓</div>
+            <div class="task-text">Algorithms — Sorting Analysis</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ATTENDANCE PAGE ══ -->
+  <div class="page" id="page-attendance">
+    <div class="grid-4" style="margin-bottom:20px">
+      <div class="card stat-card fade-in-up" style="border-bottom:3px solid var(--green)">
+        <div class="stat-icon" style="background:rgba(16,185,129,0.12)">🤖</div>
+        <div class="stat-value" style="color:var(--green)">85%</div>
+        <div class="stat-label">Machine Learning</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:85%;background:linear-gradient(90deg,var(--green),#34d399)"></div></div>
+      </div>
+      <div class="card stat-card fade-in-up delay-1" style="border-bottom:3px solid var(--accent)">
+        <div class="stat-icon" style="background:rgba(59,91,252,0.12)">🗄️</div>
+        <div class="stat-value" style="color:var(--accent)">91%</div>
+        <div class="stat-label">Database Systems</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:91%"></div></div>
+      </div>
+      <div class="card stat-card fade-in-up delay-2" style="border-bottom:3px solid var(--orange)">
+        <div class="stat-icon" style="background:rgba(249,115,22,0.12)">🌐</div>
+        <div class="stat-value" style="color:var(--orange)">72%</div>
+        <div class="stat-label">Web Technologies</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:72%;background:linear-gradient(90deg,var(--orange),#fbbf24)"></div></div>
+      </div>
+      <div class="card stat-card fade-in-up delay-3" style="border-bottom:3px solid var(--red)">
+        <div class="stat-icon" style="background:rgba(239,68,68,0.12)">🔐</div>
+        <div class="stat-value" style="color:var(--red)">68%</div>
+        <div class="stat-label">Cyber Security</div>
+        <div class="progress-wrap"><div class="progress-bar" style="width:68%;background:linear-gradient(90deg,var(--red),#f87171)"></div></div>
+        <div class="stat-sub"><span style="color:var(--red)">⚠ Below 75% — Risk</span></div>
+      </div>
+    </div>
+    <div class="card fade-in-up delay-2">
+      <div class="section-hdr"><h2>📅 Attendance Log — March 2026</h2></div>
+      <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:8px;text-align:center">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Sun</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Mon</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Tue</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Wed</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Thu</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Fri</div>
+        <div style="font-size:11px;font-weight:700;color:var(--text3);padding:6px">Sat</div>
+        <div></div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">2</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">3</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(239,68,68,0.12);color:var(--red);font-size:13px;font-weight:600">4</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">5</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">6</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(245,158,11,0.12);color:var(--gold);font-size:13px;font-weight:600">7</div>
+        <div></div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">9</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(16,185,129,0.12);color:var(--green);font-size:13px;font-weight:600">10</div>
+        <div style="padding:8px;border-radius:8px;background:rgba(59,91,252,0.18);color:var(--accent);font-size:13px;font-weight:700;border:2px solid var(--accent)">11</div>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:16px;font-size:12px">
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(16,185,129,0.3);display:inline-block"></span>Present</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(239,68,68,0.3);display:inline-block"></span>Absent</span>
+        <span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;border-radius:3px;background:rgba(245,158,11,0.3);display:inline-block"></span>Holiday</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ MESSAGES PAGE ══ -->
+  <div class="page" id="page-messages">
+    <div class="grid-2">
+      <div class="card fade-in-up" style="padding:0;overflow:hidden">
+        <div style="padding:20px;border-bottom:1px solid var(--border)">
+          <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px">💬 Inbox</div>
+        </div>
+        <div id="msgList">
+          <div class="msg-item" style="display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s;background:rgba(59,91,252,0.05)" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='rgba(59,91,252,0.05)'">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">AK</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px">Prof. A. Kumar</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Regarding your ML assignment...</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">10:42 AM</div>
+            </div>
+            <div style="width:8px;height:8px;background:var(--accent);border-radius:50%;margin-top:6px"></div>
+          </div>
+          <div class="msg-item" style="display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--accent3));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">RS</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px">Prof. R. Singh</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Lab session rescheduled to...</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">Yesterday</div>
+            </div>
+          </div>
+          <div class="msg-item" style="display:flex;gap:12px;padding:16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background 0.2s" onmouseover="this.style.background='var(--bg2)'" onmouseout="this.style.background='transparent'">
+            <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--gold),var(--orange));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0">SP</div>
+            <div style="flex:1">
+              <div style="font-weight:600;font-size:14px">Student Council</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Hackathon team formation open...</div>
+              <div style="font-size:11px;color:var(--text3);margin-top:4px">2 days ago</div>
+            </div>
+            <div style="width:8px;height:8px;background:var(--green);border-radius:50%;margin-top:6px"></div>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in-up delay-2" style="display:flex;flex-direction:column">
+        <div style="font-family:'Syne',sans-serif;font-weight:700;font-size:16px;margin-bottom:16px">Prof. A. Kumar</div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+          <div style="background:var(--bg2);border-radius:12px 12px 12px 4px;padding:12px 14px;max-width:80%;font-size:14px">
+            Hi Sakshi, I reviewed your Assignment 3. Great work on the implementation! 🎉
+          </div>
+          <div style="background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;border-radius:12px 12px 4px 12px;padding:12px 14px;max-width:80%;font-size:14px;align-self:flex-end">
+            Thank you sir! I'll submit Assignment 4 by Friday.
+          </div>
+          <div style="background:var(--bg2);border-radius:12px 12px 12px 4px;padding:12px 14px;max-width:80%;font-size:14px">
+            Regarding your ML assignment query — please attend office hours tomorrow at 4 PM.
+          </div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <input class="task-input" placeholder="Type a message..." style="flex:1">
+          <button class="btn-add ripple">Send ↗</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // ── THEME TOGGLE ──
+  function toggleTheme(btn) {
+    const html = document.documentElement;
+    const isDark = html.getAttribute('data-theme') === 'dark';
+    html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    btn.classList.toggle('on', !isDark);
+    document.querySelector('.theme-label').textContent = isDark ? 'Dark Mode' : 'Light Mode';
+  }
+
+  // ── SIDEBAR ──
+  function openSidebar() {
+    document.getElementById('sidebar').classList.add('open');
+    document.getElementById('overlay').classList.add('show');
+  }
+  function closeSidebar() {
+    document.getElementById('sidebar').classList.remove('open');
+    document.getElementById('overlay').classList.remove('show');
+  }
+
+  // ── NAV ──
+  const pageTitles = {
+    dashboard: ['Good Morning, Sakshi! 👋', 'Wednesday, March 10 · Semester 6'],
+    courses: ['My Courses 📚', '6 enrolled this semester'],
+    assignments: ['Assignments 📝', '3 pending · 18 completed'],
+    attendance: ['Attendance 📅', 'Overall: 85% · Keep it up!'],
+    messages: ['Messages 💬', '5 unread messages'],
+  };
+
+  function showPage(name, el) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    document.getElementById('page-'+name).classList.add('active');
+    el.classList.add('active');
+    document.getElementById('pageTitle').textContent = pageTitles[name][0];
+    document.getElementById('pageSubtitle').textContent = pageTitles[name][1];
+    closeSidebar();
+  }
+
+  // ── ANIMATE STATS ──
+  function animateValue(el, target, suffix, duration) {
+    const start = performance.now();
+    const isFloat = target % 1 !== 0;
+    function step(ts) {
+      const p = Math.min((ts - start) / duration, 1);
+      const ease = 1 - Math.pow(1-p, 3);
+      const val = isFloat ? (target * ease).toFixed(1) : Math.round(target * ease);
+      el.textContent = val + suffix;
+      if (p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      animateValue(document.getElementById('attVal'), 85, '%', 1400);
+      animateValue(document.getElementById('gpaVal'), 8.4, '', 1400);
+      document.getElementById('attBar').style.width = '85%';
+      document.getElementById('gpaBar').style.width = '84%';
+      document.getElementById('assBar').style.width = '86%';
+    }, 400);
+
+    // Init tasks
+    const defaultTasks = [
+      { text: 'Complete ML Assignment 4', done: false },
+      { text: 'Study for mid-term exams', done: false },
+      { text: 'Review DBMS notes', done: true },
+    ];
+    defaultTasks.forEach(t => addTask(t.text, t.done));
+  });
+
+  // ── TASKS ──
+  let tasks = [];
+  function addTask(text, done=false) {
+    const input = document.getElementById('taskInput');
+    const taskText = text || input.value.trim();
+    if (!taskText) return;
+    tasks.push({ text: taskText, done });
+    renderTasks();
+    if (!text) input.value = '';
+  }
+
+  function toggleTask(idx) {
+    tasks[idx].done = !tasks[idx].done;
+    renderTasks();
+  }
+
+  function deleteTask(idx) {
+    const items = document.querySelectorAll('.task-item');
+    items[idx].style.animation = 'none';
+    items[idx].style.opacity = '0';
+    items[idx].style.transform = 'translateX(20px)';
+    items[idx].style.transition = 'all 0.3s';
+    setTimeout(() => { tasks.splice(idx, 1); renderTasks(); }, 300);
+  }
+
+  function renderTasks() {
+    const list = document.getElementById('taskList');
+    const done = tasks.filter(t => t.done).length;
+    document.getElementById('taskCount').textContent = `${done}/${tasks.length} done`;
+    list.innerHTML = tasks.map((t, i) => `
+      <div class="task-item ${t.done ? 'done' : ''}" style="cursor:default">
+        <div class="task-check" onclick="toggleTask(${i})">
+          ${t.done ? '✓' : ''}
+        </div>
+        <div class="task-text">${t.text}</div>
+        <button class="task-del" onclick="deleteTask(${i})">🗑</button>
+      </div>
+    `).join('');
+  }
+
+  // ── RIPPLE ──
+  document.addEventListener('click', function(e) {
+    const el = e.target.closest('.ripple');
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const r = document.createElement('span');
+    r.className = 'ripple-effect';
+    const size = Math.max(rect.width, rect.height);
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    el.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  });
+</script>
+</body>
+</html>
